@@ -267,12 +267,18 @@ If you want to use embedding models compatible with the OpenAI API (such as Alib
 1. Replace the contents of `api/config/embedder.json` with those from `api/config/embedder_openai_compatible.json`.
 2. In your project root `.env` file, set the relevant environment variables, for example:
    ```
+   DEEPWIKI_EMBEDDER_TYPE=openai_compatible
+   EMBEDDING_BASE_URL=your_openai_compatible_endpoint
+   EMBEDDING_MODEL=your_embedding_model_name
+   # If authentication is required
    OPENAI_API_KEY=your_api_key
-   OPENAI_BASE_URL=your_openai_compatible_endpoint
    ```
-3. The program will automatically substitute placeholders in embedder.json with the values from your environment variables.
 
-This allows you to seamlessly switch to any OpenAI-compatible embedding service without code changes.
+   If `OPENAI_API_KEY` is not set, the embedder will attempt to use `OPENAI_API_KEY` environment variable as a fallback, or proceed without an API key if the service allows (e.g. local Qwen).
+
+3. The program will automatically use these settings. You don't need to replace the config file manually.
+
+This allows you to seamlessly switch to any OpenAI-compatible embedding service (like Qwen/Qwen3) without code changes.
 
 ## 🧠 Using Google AI Embeddings
 
@@ -569,6 +575,32 @@ OpenRouter is particularly useful if you want to:
 - Access models that might be restricted in your region
 - Compare performance across different model providers
 - Optimize for cost vs. performance based on your needs
+
+## 🔌 Model Context Protocol (MCP) Support
+
+DeepWiki includes a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that allows you to connect DeepWiki's knowledge base to MCP-compatible AI assistants like **Claude Desktop** or **Windsurf**.
+
+### Running the MCP Server
+
+The MCP server runs separately from the main API and frontend. To start it:
+
+```bash
+# Make sure you have installed the dependencies
+python -m api.mcp_server
+```
+
+### Configuration
+
+The MCP server uses the same environment variables and configuration files as the main application. It can access any wiki content that has been generated and cached by DeepWiki.
+
+### Available Tools
+
+When connected, the MCP server exposes the following tools to your AI assistant:
+
+- **`list_available_wikis`**: Lists all generated wikis currently available in the cache.
+- **`query_wiki`**: Allows the AI to perform RAG (Retrieval Augmented Generation) queries against a specific repository's wiki.
+
+This enables you to have a conversation with your local AI assistant about any codebase you've processed with DeepWiki, without needing to manually copy-paste context.
 
 ## 🤖 Ask & DeepResearch Features
 
