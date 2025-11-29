@@ -47,6 +47,14 @@ WIKI_AUTH_CODE = os.environ.get('DEEPWIKI_AUTH_CODE', '')
 
 # Embedder settings
 EMBEDDER_TYPE = os.environ.get('DEEPWIKI_EMBEDDER_TYPE', 'openai').lower()
+EMBEDDING_BASE_URL = os.environ.get('EMBEDDING_BASE_URL')
+EMBEDDING_MODEL = os.environ.get('EMBEDDING_MODEL', 'text-embedding-3-small')
+
+# Add these to environment so they can be picked up by placeholder replacement
+if EMBEDDING_BASE_URL:
+    os.environ["EMBEDDING_BASE_URL"] = EMBEDDING_BASE_URL
+if EMBEDDING_MODEL:
+    os.environ["EMBEDDING_MODEL"] = EMBEDDING_MODEL
 
 # Get configuration directory from environment variable, or use default if not set
 CONFIG_DIR = os.environ.get('DEEPWIKI_CONFIG_DIR', None)
@@ -169,6 +177,8 @@ def get_embedder_config():
         return configs.get("embedder_google", {})
     elif embedder_type == 'ollama' and 'embedder_ollama' in configs:
         return configs.get("embedder_ollama", {})
+    elif embedder_type == 'openai_compatible' and 'embedder_openai_compatible' in configs:
+        return configs.get("embedder_openai_compatible", {})
     else:
         return configs.get("embedder", {})
 
@@ -212,17 +222,29 @@ def is_google_embedder():
     client_class = embedder_config.get("client_class", "")
     return client_class == "GoogleEmbedderClient"
 
+def is_openai_compatible_embedder():
+    """
+    Check if the current embedder configuration uses OpenAIClient with custom settings.
+
+    Returns:
+        bool: True if using custom OpenAIClient, False otherwise
+    """
+    embedder_type = EMBEDDER_TYPE
+    return embedder_type == 'openai_compatible'
+
 def get_embedder_type():
     """
     Get the current embedder type based on configuration.
     
     Returns:
-        str: 'ollama', 'google', or 'openai' (default)
+        str: 'ollama', 'google', 'openai_compatible' or 'openai' (default)
     """
     if is_ollama_embedder():
         return 'ollama'
     elif is_google_embedder():
         return 'google'
+    elif is_openai_compatible_embedder():
+        return 'openai_compatible'
     else:
         return 'openai'
 
@@ -316,7 +338,7 @@ if generator_config:
 
 # Update embedder configuration
 if embedder_config:
-    for key in ["embedder", "embedder_ollama", "embedder_google", "retriever", "text_splitter"]:
+    for key in ["embedder", "embedder_ollama", "embedder_google", "embedder_openai_compatible", "retriever", "text_splitter"]:
         if key in embedder_config:
             configs[key] = embedder_config[key]
 
