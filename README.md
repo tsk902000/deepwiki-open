@@ -267,12 +267,18 @@ If you want to use embedding models compatible with the OpenAI API (such as Alib
 1. Replace the contents of `api/config/embedder.json` with those from `api/config/embedder_openai_compatible.json`.
 2. In your project root `.env` file, set the relevant environment variables, for example:
    ```
+   DEEPWIKI_EMBEDDER_TYPE=openai_compatible
+   EMBEDDING_BASE_URL=your_openai_compatible_endpoint
+   EMBEDDING_MODEL=your_embedding_model_name
+   # If authentication is required
    OPENAI_API_KEY=your_api_key
-   OPENAI_BASE_URL=your_openai_compatible_endpoint
    ```
-3. The program will automatically substitute placeholders in embedder.json with the values from your environment variables.
 
-This allows you to seamlessly switch to any OpenAI-compatible embedding service without code changes.
+   If `OPENAI_API_KEY` is not set, the embedder will attempt to use `OPENAI_API_KEY` environment variable as a fallback, or proceed without an API key if the service allows (e.g. local Qwen).
+
+3. The program will automatically use these settings. You don't need to replace the config file manually.
+
+This allows you to seamlessly switch to any OpenAI-compatible embedding service (like Qwen/Qwen3) without code changes.
 
 ## 🧠 Using Google AI Embeddings
 
