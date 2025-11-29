@@ -573,6 +573,46 @@ async def root():
         "endpoints": endpoints
     }
 
+# --- Codemap Endpoint ---
+from api.tools.codemap import generate_codemap_data, FileNode
+
+@app.get("/api/codemap")
+async def get_codemap(
+    owner: str = Query(..., description="Repository owner"),
+    repo: str = Query(..., description="Repository name"),
+    repo_type: str = Query(..., description="Repository type (e.g., github, gitlab)"),
+):
+    """
+    Returns the file structure of the repository for the Codemap visualization.
+    """
+    # Construct the local path where the repo should be cloned
+    # This logic assumes the repo is already cloned by the RAG pipeline
+    # The path logic should match DatabaseManager.prepare_database
+
+    # Standard path in ~/.adalflow/repos/{owner}/{repo}
+    # But wait, DatabaseManager might use a different structure or hashing.
+    # Let's check how DatabaseManager stores repos.
+    # For now assuming standard:
+    repo_path = os.path.join(get_adalflow_default_root_path(), "repos", f"{owner}_{repo}")
+
+    # If not found, try to find it via fuzzy match or specific logic if needed
+    if not os.path.exists(repo_path):
+        # Try without underscores if that was the convention
+        repo_path_alt = os.path.join(get_adalflow_default_root_path(), "repos", repo) # sometimes it's just the repo name
+        if os.path.exists(repo_path_alt):
+             repo_path = repo_path_alt
+        else:
+             logger.warning(f"Repository not found at {repo_path}")
+             raise HTTPException(status_code=404, detail="Repository not found. Please generate the wiki first.")
+
+    try:
+        logger.info(f"Generating Codemap for {repo_path}")
+        root_node = generate_codemap_data(repo_path)
+        return root_node
+    except Exception as e:
+        logger.error(f"Error generating codemap: {e}")
+        raise HTTPException(status_code=500, detail=f"Error generating codemap: {str(e)}")
+
 # --- Processed Projects Endpoint --- (New Endpoint)
 @app.get("/api/processed_projects", response_model=List[ProcessedProjectEntry])
 async def get_processed_projects():
