@@ -22,6 +22,18 @@
       "task_type": "SEMANTIC_SIMILARITY"
     }
   },
+  "embedder_openai_compatible": {
+    "client_class": "OpenAIClient",
+    "batch_size": 500,
+    "initialize_kwargs": {
+      "base_url": "${EMBEDDING_BASE_URL}"
+    },
+    "model_kwargs": {
+      "model": "${EMBEDDING_MODEL}",
+      "dimensions": 256,
+      "encoding_format": "float"
+    }
+  },
   "retriever": {
     "top_k": 20
   },

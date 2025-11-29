@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { FaWikipediaW, FaGithub, FaCoffee, FaTwitter } from 'react-icons/fa';
 import ThemeToggle from '@/components/theme-toggle';
 import Mermaid from '../components/Mermaid';
+import Codemap from '@/components/Codemap';
 import ConfigurationModal from '@/components/ConfigurationModal';
 import ProcessedProjects from '@/components/ProcessedProjects';
 import { extractUrlPath, extractUrlDomain } from '@/utils/urlDecoder';
@@ -144,6 +145,8 @@ export default function Home() {
   const [authRequired, setAuthRequired] = useState<boolean>(false);
   const [authCode, setAuthCode] = useState<string>('');
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
+
+  const [showCodemap, setShowCodemap] = useState<{owner: string, repo: string, type: string} | null>(null);
 
   // Sync the language context with the selectedLanguage state
   useEffect(() => {
@@ -508,6 +511,21 @@ export default function Home() {
                 maxItems={6}
                 messages={messages}
                 className="w-full"
+                onProjectClick={(project) => {
+                    // Could add a button in ProcessedProjects or handle it here
+                }}
+                renderExtraActions={(project) => (
+                    <button
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setShowCodemap({owner: project.owner, repo: project.repo, type: project.repo_type});
+                        }}
+                        className="text-xs bg-[var(--accent-primary)] text-white px-2 py-1 rounded ml-2 hover:opacity-80 transition"
+                    >
+                        Codemap
+                    </button>
+                )}
               />
             </div>
           ) : (
@@ -595,6 +613,15 @@ export default function Home() {
           )}
         </div>
       </main>
+
+      {showCodemap && (
+          <Codemap
+            owner={showCodemap.owner}
+            repo={showCodemap.repo}
+            repoType={showCodemap.type}
+            onClose={() => setShowCodemap(null)}
+          />
+      )}
 
       <footer className="max-w-6xl mx-auto mt-8 flex flex-col gap-4 w-full">
         <div

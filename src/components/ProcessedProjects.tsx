@@ -20,13 +20,17 @@ interface ProcessedProjectsProps {
   maxItems?: number;
   className?: string;
   messages?: Record<string, Record<string, string>>; // Translation messages with proper typing
+  onProjectClick?: (project: ProcessedProject) => void;
+  renderExtraActions?: (project: ProcessedProject) => React.ReactNode;
 }
 
 export default function ProcessedProjects({ 
   showHeader = true, 
   maxItems, 
   className = "",
-  messages 
+  messages,
+  onProjectClick,
+  renderExtraActions
 }: ProcessedProjectsProps) {
   const [projects, setProjects] = useState<ProcessedProject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -58,7 +62,7 @@ export default function ProcessedProjects({
       setIsLoading(true);
       setError(null);
       try {
-        const response = await fetch('/api/wiki/projects');
+        const response = await fetch('/api/processed_projects');
         if (!response.ok) {
           throw new Error(`Failed to fetch projects: ${response.statusText}`);
         }
@@ -218,6 +222,7 @@ export default function ProcessedProjects({
                     <span className="px-2 py-1 text-xs bg-[var(--background)] text-[var(--muted)] rounded-full border border-[var(--border-color)]">
                       {project.language}
                     </span>
+                    {renderExtraActions && renderExtraActions(project)}
                   </div>
                   <p className="text-xs text-[var(--muted)]">
                     {t('processedOn')} {new Date(project.submittedAt).toLocaleDateString()}
@@ -250,6 +255,7 @@ export default function ProcessedProjects({
                     <span className="px-2 py-1 text-xs bg-[var(--accent-primary)]/10 text-[var(--accent-primary)] rounded border border-[var(--accent-primary)]/20">
                       {project.repo_type}
                     </span>
+                    {renderExtraActions && renderExtraActions(project)}
                   </div>
                 </Link>
               </div>
